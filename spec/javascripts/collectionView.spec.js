@@ -747,6 +747,40 @@ describe("collection view", function(){
     });
   });
 
+  describe("when a collection is reset itemViews should not be shown until the buffering is over", function() {
+    var isBuffering, iv, cv, collection, cvInstance;
+
+    collection = new Backbone.Collection([{}]);
+
+    iv = Marionette.ItemView.extend({
+        template: _.template("<div>hi mom</div>"),
+        onShow: function() {
+          isBuffering = cvInstance.isBuffering;
+        }
+    });
+
+    cv = Marionette.CollectionView.extend({
+      itemView: iv
+    });
+
+    beforeEach(function() {
+      isBuffering = null;
+    });
+
+    it("collectionView should not be buffering on itemView show", function() {
+      cvInstance = new cv({collection: collection});
+      cvInstance.render().trigger('show');
+      expect(isBuffering).toBe(false);
+    });
+
+    it("collectionView should not be buffering after reset on itemView show", function() {
+      cvInstance = new cv({collection: collection});
+      cvInstance.render().trigger('show');
+      collection.reset([{}]);
+      expect(isBuffering).toBe(false);
+    });
+  });
+
   describe("when a collection view is not rendered", function() {
     var collection, cv, model1, model2;
 
